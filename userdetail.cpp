@@ -1,5 +1,4 @@
 #include "userdetail.h"
-#include "qforeach.h"
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -8,7 +7,7 @@
 UserDetail::UserDetail(QObject *parent)
     : QAbstractListModel(parent)
 {
-
+    loadJson();
 }
 
 int UserDetail::rowCount(const QModelIndex &parent) const
@@ -22,28 +21,34 @@ int UserDetail::rowCount(const QModelIndex &parent) const
     return 10;
 }
 
-QVariant UserDetail::data(const QModelIndex &index, int role) const
+void UserDetail::loadJson()
 {
     //Initialise with Data
     //TODO: ADD Dynamic PATH
     QFile file("../UserDetailsListView/Data.json");
     QString val;
-    QJsonDocument doc;
+
     QJsonObject obj;
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         val=file.readAll();
         file.close();//required to convert to utf8 or else wont output
-        QJsonDocument doc = QJsonDocument::fromJson(val.toUtf8());
-
-        if (doc.isArray())
-               {
-                   QJsonObject obj = doc[index.row()].toObject();
-                   qInfo() << "Name:" << obj.value("name").toString();
-                   qInfo() << "Age:" << obj.value("age").toInt();
-               }
+        doc = QJsonDocument::fromJson(val.toUtf8());
 
     }
+
+}
+
+QVariant UserDetail::data(const QModelIndex &index, int role) const
+{
+    QJsonObject obj = doc[index.row()].toObject();
+    const int id = obj.value("id").toInt();
+    const QString balance = obj.value("balance").toString();
+    const int age = obj.value("age").toInt();
+    const QString name = obj.value("name").toString();
+    const QString gender = obj.value("gender").toString();
+    const QString email = obj.value("email").toString();
+    const QString phone = obj.value("phone").toString();
 
     if (!index.isValid())
         return QVariant();
@@ -51,19 +56,19 @@ QVariant UserDetail::data(const QModelIndex &index, int role) const
     // FIXME: Implement me!
     switch(role){
         case IdRole:
-            return QVariant(false);
+            return QVariant(id);
         case BalanceRole:
-            return QVariant(file.exists());
+            return QVariant(balance);
         case AgeRole:
-        return QVariant(obj.value("age").toInt());
+        return QVariant(age);
         case NameRole:
-        return QVariant(obj.value("name").toString());
+        return QVariant(name);
         case GenderRole:
-        return QVariant(QStringLiteral("Test"));
+        return QVariant(gender);
         case EmailRole:
-        return QVariant(QStringLiteral("Test"));
+        return QVariant(email);
         case PhoneRole:
-        return QVariant(QStringLiteral("Test"));
+        return QVariant(phone);
     }
     return QVariant();
 }

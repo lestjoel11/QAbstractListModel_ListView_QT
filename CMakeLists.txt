@@ -18,6 +18,7 @@ set(PROJECT_SOURCES
         userdetail.h
         userdetail.cpp
         Data.json
+
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

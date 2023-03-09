@@ -1,19 +1,11 @@
 #ifndef USERDETAIL_H
 #define USERDETAIL_H
 
+#include "qjsondocument.h"
 #include <QAbstractListModel>
 #include <QVector>
 
 
-struct User{
-    int id;
-    QString balance;
-    int age;
-    QString name;
-    QString gender;
-    QString email;
-    QString phone;
-};
 
 class UserDetail : public QAbstractListModel
 {
@@ -21,6 +13,7 @@ class UserDetail : public QAbstractListModel
 
 public:
     explicit UserDetail(QObject *parent = nullptr);
+
     enum Roles {
                IdRole = Qt::UserRole,
                BalanceRole,
@@ -32,6 +25,7 @@ public:
            };
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    void loadJson();
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
@@ -44,7 +38,7 @@ public:
     virtual QHash<int, QByteArray> roleNames() const override;
 
 private:
-
+    QJsonDocument doc;
 };
 
 #endif // USERDETAIL_H

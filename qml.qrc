@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>Data.json</file>
+        <file>ExpandedBox.qml</file>
     </qresource>
 </RCC>
