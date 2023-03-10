@@ -10,6 +10,8 @@ Rectangle {
     property alias phone: phone.text
     property alias gender: gender.text
 
+
+
     states: [
         State {
             name: "default"
@@ -20,19 +22,28 @@ Rectangle {
 
             }
             PropertyChanges {
-                target: name;
+                target: detailsColumn;
+            }
+            PropertyChanges {
+                target: moreDetails
+                visible: false
+
             }
         },
+        //Question?: HOw to make column dynamic to the size of the text inside it?
         State {
             name: "expanded"
             PropertyChanges {
                 target: infoBox;
                 color:"green"
-                height: 70;
+                height: 145;
             }
             PropertyChanges {
-                target: name;
-                anchors.top: parent.top
+                target: detailsColumn;
+            }
+            PropertyChanges {
+                target: moreDetails
+                visible: true
 
             }
         }
@@ -41,52 +52,70 @@ Rectangle {
 
     transitions: [
         Transition {
+            from:"default"
+            to: "expanded";
             PropertyAnimation {
                 target: infoBox
                 property: "height"
-                duration: 150
-            }
-            NumberAnimation {
-                target: name
-                property: "anchors"
-                duration: 150
+                duration: 130
             }
 
+        },
+        Transition {
+            from: "expanded";
+            to:"default"
+            PropertyAnimation {
+                target: moreDetails
+                property: "visible"
+                duration: 280
+            }
+            PropertyAnimation {
+                target: infoBox
+                property: "height"
+                duration: 300
+            }
         }
     ]
 
     border.color: color.lighter()
-    width: parent.width
     Column{
-        id:column
-        spacing:5
-        anchors.centerIn: parent
+        id:detailsColumn
+        anchors.horizontalCenter: infoBox.horizontalCenter
+        padding:5
         Text {
             id: name
+            font:{
+                font.bold=3;
+            }
         }
         Item{
             id:moreDetails
-            visible:false
+            anchors.top: name.bottom
+            x: balance.paintedWidth-detailsColumn.width
 
-            Text{
-                id:balance
+            Column{
+                padding:7
+                spacing:5
+                id:moreDetailsColumn
+                Text{
+                    id:balance
+                }
+                Text{
+                    id:age
 
-            }
-            Text{
-                id:age
+                }
+                Text{
+                    id:gender
 
-            }
-            Text{
-                id:gender
+                }
+                Text{
+                    id:email
 
-            }
-            Text{
-                id:email
+                }
+                Text{
+                    id:phone
 
-            }
-            Text{
-                id:phone
-
+                }
             }
         }
     }
@@ -96,6 +125,7 @@ Rectangle {
         anchors.fill: parent
         onClicked: function(){
             infoBox.state = (infoBox.state === "default"?"expanded":"default");
+            console.log(phone.paintedHeight)
         }
     }
 

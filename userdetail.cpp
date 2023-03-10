@@ -18,7 +18,7 @@ int UserDetail::rowCount(const QModelIndex &parent) const
         return 0;
 
     // FIXME: Implement me!
-    return 10;
+    return 100000;
 }
 
 void UserDetail::loadJson()
