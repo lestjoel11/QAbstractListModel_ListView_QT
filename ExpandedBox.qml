@@ -10,15 +10,16 @@ Rectangle {
     property alias phone: phone.text
     property alias gender: gender.text
 
-
-
+    //Set height on info box and set it equal to column height
+    border.color: color.lighter()
     states: [
         State {
             name: "default"
             PropertyChanges {
                 target: infoBox;
-                color:"steelblue"
-                height: 30;
+                color:"darkgray"
+                height: detailsColumn.height
+//                height: 30;
 
             }
             PropertyChanges {
@@ -35,7 +36,8 @@ Rectangle {
             name: "expanded"
             PropertyChanges {
                 target: infoBox;
-                color:"green"
+                color:"cornsilk"
+//                height: detailsColumn.height
                 height: 145;
             }
             PropertyChanges {
@@ -77,16 +79,14 @@ Rectangle {
         }
     ]
 
-    border.color: color.lighter()
+
     Column{
         id:detailsColumn
         anchors.horizontalCenter: infoBox.horizontalCenter
         padding:5
         Text {
             id: name
-            font:{
-                font.bold=3;
-            }
+            font.bold:true;
         }
         Item{
             id:moreDetails
@@ -125,7 +125,6 @@ Rectangle {
         anchors.fill: parent
         onClicked: function(){
             infoBox.state = (infoBox.state === "default"?"expanded":"default");
-            console.log(phone.paintedHeight)
         }
     }
 

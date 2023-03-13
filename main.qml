@@ -1,6 +1,9 @@
 import QtQuick 2.15
 import QtQuick.Window 2.15
 import UserInfo
+
+
+//Implement a C++ method that accepts the items in array
 Window {
     id: root
     width: 640
@@ -11,23 +14,21 @@ Window {
         id:title
         text: "List of Users"
         padding: 5
-        font: {
-            font.pixelSize=14;
-            font.bold = 1;
-            font.letterSpacing = 2;
+        font{
+            pixelSize:14;
+            bold: true;
+            letterSpacing: 2;
         }
         anchors.horizontalCenter: parent.horizontalCenter
     }
     ListView{
-
         anchors.fill: parent
         anchors.top: title.bottom
         anchors.topMargin: 30
         clip:true
         model: UserDetail{}
 
-        delegate:ExpandedBox
-        {
+        delegate:ExpandedBox{
             width: root.width
             name: model.name
             age: "Age: " +model.age
@@ -39,4 +40,6 @@ Window {
         }
         spacing: 1
     }
+
+
 }

@@ -1,7 +1,6 @@
 #ifndef USERDETAIL_H
 #define USERDETAIL_H
 
-#include "qjsondocument.h"
 #include <QAbstractListModel>
 #include <QVector>
 
@@ -28,7 +27,7 @@ public:
     void loadJson();
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-
+    Q_INVOKABLE
 
     // Editable:
     bool setData(const QModelIndex &index, const QVariant &value,
@@ -38,7 +37,7 @@ public:
     virtual QHash<int, QByteArray> roleNames() const override;
 
 private:
-    QJsonDocument doc;
+    QVariant doc;
 };
 
 #endif // USERDETAIL_H

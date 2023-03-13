@@ -17,10 +17,10 @@ int UserDetail::rowCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
+    //Change 3 When you implement loading for server The List .count
     // FIXME: Implement me!
-    return 100000;
+    return 1;
 }
-
 void UserDetail::loadJson()
 {
     //Initialise with Data
@@ -33,7 +33,7 @@ void UserDetail::loadJson()
     {
         val=file.readAll();
         file.close();//required to convert to utf8 or else wont output
-        doc = QJsonDocument::fromJson(val.toUtf8());
+        doc = QJsonDocument::fromJson(val.toUtf8()).toVariant(); //Change Dont work with QJSON dirctly ;
 
     }
 
@@ -41,14 +41,17 @@ void UserDetail::loadJson()
 
 QVariant UserDetail::data(const QModelIndex &index, int role) const
 {
-    QJsonObject obj = doc[index.row()].toObject();
-    const int id = obj.value("id").toInt();
-    const QString balance = obj.value("balance").toString();
-    const int age = obj.value("age").toInt();
-    const QString name = obj.value("name").toString();
-    const QString gender = obj.value("gender").toString();
-    const QString email = obj.value("email").toString();
-    const QString phone = obj.value("phone").toString();
+    //Change 2 Use QVariant .atIndex
+    //.toMap to clean 47-53
+    QList obj = doc.toList();
+    QMap currentRow = obj.at(index.row()).toMap();
+    const int id = currentRow.value("id").toInt();
+    const QString balance = currentRow.value("balance").toString();
+    const int age = currentRow.value("age").toInt();
+    const QString name = currentRow.value("name").toString();
+    const QString gender = currentRow.value("gender").toString();
+    const QString email = currentRow.value("email").toString();
+    const QString phone = currentRow.value("phone").toString();
 
     if (!index.isValid())
         return QVariant();
