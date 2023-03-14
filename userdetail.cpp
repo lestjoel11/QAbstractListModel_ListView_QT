@@ -22,7 +22,7 @@ int UserDetail::rowCount(const QModelIndex &parent) const
 
     //Change 3 When you implement loading for server The List .count
     // FIXME: Implement me!
-//    return doc.toList().count();
+    //    return doc.toList().count();
     return dataRange;
 }
 void UserDetail::loadJson()
@@ -33,7 +33,7 @@ void UserDetail::loadJson()
     QString url = "http://localhost:3000/"+QString::number(dataRange);
     QNetworkRequest request((QUrl(url)));
     QNetworkReply  *reply = manager->get(request);
-//    QJsonDocument jsonData = QJsonDocument::fromJson(reply)
+    //    QJsonDocument jsonData = QJsonDocument::fromJson(reply)
 
 
 
@@ -77,19 +77,19 @@ QVariant UserDetail::data(const QModelIndex &index, int role) const
 
     // FIXME: Implement me!
     switch(role){
-        case IdRole:
-            return QVariant(id);
-        case BalanceRole:
-            return QVariant(balance);
-        case AgeRole:
+    case IdRole:
+        return QVariant(id);
+    case BalanceRole:
+        return QVariant(balance);
+    case AgeRole:
         return QVariant(age);
-        case NameRole:
+    case NameRole:
         return QVariant(name);
-        case GenderRole:
+    case GenderRole:
         return QVariant(gender);
-        case EmailRole:
+    case EmailRole:
         return QVariant(email);
-        case PhoneRole:
+    case PhoneRole:
         return QVariant(phone);
     }
     return QVariant();
@@ -99,6 +99,31 @@ void UserDetail::currentState()
 {
     nextBatch();
     qDebug() << QString::number(dataRange);
+}
+
+void UserDetail::finishedReply(QNetworkReply *reply)
+{
+    {
+        //check if error
+        if(reply->error() == QNetworkReply::NoError) {
+            QByteArray data = reply->readAll();
+            QVariant jsonData = QJsonDocument::fromJson(data).toVariant();
+
+            setJSONData(jsonData);
+        }else{
+            //handle error
+            qDebug() << "Error: " << reply->errorString();
+        }
+        //delete reply object
+        reply->deleteLater();
+    };
+}
+
+void UserDetail::setJSONData(const QVariant &data)
+{
+    doc = data;
+    qDebug() << doc;
+
 }
 
 bool UserDetail::setData(const QModelIndex &index, const QVariant &value, int role)

@@ -50,26 +50,8 @@ public slots:
     void currentState();
 
 private slots:
-    void finishedReply(QNetworkReply *reply) {
-        //check if error
-        if(reply->error() == QNetworkReply::NoError) {
-            QByteArray data = reply->readAll();
-            QVariant jsonData = QJsonDocument::fromJson(data).toVariant();
-
-            setJSONData(jsonData);
-        }else{
-            //handle error
-            qDebug() << "Error: " << reply->errorString();
-        }
-        //delete reply object
-        reply->deleteLater();
-    };
-
-    void setJSONData(const QVariant &data){
-        doc = data;
-        qDebug() << doc;
-    };
-
+    void finishedReply(QNetworkReply *reply);
+    void setJSONData(const QVariant &data);
 };
 
 #endif // USERDETAIL_H
