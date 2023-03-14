@@ -35,17 +35,17 @@ void UserDetail::loadJson()
     //    QJsonDocument jsonData = QJsonDocument::fromJson(reply)
 
 
-//    QFile file("../UserDetailsListView/Data.json");
-//    QString val;
+    //    QFile file("../UserDetailsListView/Data.json");
+    //    QString val;
 
-//    QJsonObject obj;
-//    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
-//    {
-//        val=file.readAll();
-//        file.close();//required to convert to utf8 or else wont output
-//        doc = QJsonDocument::fromJson(val.toUtf8()).toVariant(); //Change Dont work with QJSON dirctly ;
+    //    QJsonObject obj;
+    //    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    //    {
+    //        val=file.readAll();
+    //        file.close();//required to convert to utf8 or else wont output
+    //        doc = QJsonDocument::fromJson(val.toUtf8()).toVariant(); //Change Dont work with QJSON dirctly ;
 
-//    }
+    //    }
 
 }
 
@@ -99,19 +99,18 @@ void UserDetail::currentState()
 
 void UserDetail::finishedReply(QNetworkReply *reply)
 {
-    {
-        //check if error
-        if(reply->error() == QNetworkReply::NoError) {
-            QByteArray data = reply->readAll();
-            QVariant jsonData = QJsonDocument::fromJson(data).toVariant();
-            setJSONData(jsonData);
-        }else{
-            //handle error
-            qDebug() << "Error: " << reply->errorString();
-        }
-        //delete reply object
-        reply->deleteLater();
-    };
+
+    //check if error
+    if(reply->error() == QNetworkReply::NoError) {
+        QByteArray data = reply->readAll();
+        QVariant jsonData = QJsonDocument::fromJson(data).toVariant();
+        setJSONData(jsonData);
+    }else{
+        //handle error
+        qDebug() << "Error: " << reply->errorString();
+    }
+    //delete reply object
+    reply->deleteLater();
 }
 
 void UserDetail::setJSONData(const QVariant &data)
