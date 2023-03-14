@@ -20,7 +20,6 @@ int UserDetail::rowCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
-    //Change 3 When you implement loading for server The List .count
     // FIXME: Implement me!
     //    return doc.toList().count();
     return dataRange;
@@ -32,23 +31,21 @@ void UserDetail::loadJson()
     connect(manager,SIGNAL(finished(QNetworkReply*)), this, SLOT(finishedReply(QNetworkReply*)));
     QString url = "http://localhost:3000/"+QString::number(dataRange);
     QNetworkRequest request((QUrl(url)));
-    QNetworkReply  *reply = manager->get(request);
+    QNetworkReply *reply = manager->get(request);
     //    QJsonDocument jsonData = QJsonDocument::fromJson(reply)
 
 
+//    QFile file("../UserDetailsListView/Data.json");
+//    QString val;
 
+//    QJsonObject obj;
+//    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+//    {
+//        val=file.readAll();
+//        file.close();//required to convert to utf8 or else wont output
+//        doc = QJsonDocument::fromJson(val.toUtf8()).toVariant(); //Change Dont work with QJSON dirctly ;
 
-    QFile file("../UserDetailsListView/Data.json");
-    QString val;
-
-    QJsonObject obj;
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        val=file.readAll();
-        file.close();//required to convert to utf8 or else wont output
-        doc = QJsonDocument::fromJson(val.toUtf8()).toVariant(); //Change Dont work with QJSON dirctly ;
-
-    }
+//    }
 
 }
 
@@ -60,8 +57,7 @@ void UserDetail::nextBatch()
 
 QVariant UserDetail::data(const QModelIndex &index, int role) const
 {
-    //Change 2 Use QVariant .atIndex
-    //.toMap to clean 47-53
+
     QList obj = doc.toList();
     QMap currentRow = obj.at(index.row()).toMap();
     const int id = currentRow.value("id").toInt();
@@ -108,7 +104,6 @@ void UserDetail::finishedReply(QNetworkReply *reply)
         if(reply->error() == QNetworkReply::NoError) {
             QByteArray data = reply->readAll();
             QVariant jsonData = QJsonDocument::fromJson(data).toVariant();
-
             setJSONData(jsonData);
         }else{
             //handle error
