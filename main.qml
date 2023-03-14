@@ -5,11 +5,12 @@ import UserInfo
 
 //Implement a C++ method that accepts the items in array
 Window {
-    id: root
+    id: mainWindow
     width: 640
     height: 480
     visible: true
     title: qsTr("User Bank Details")
+
     Text{
         id:title
         text: "List of Users"
@@ -21,25 +22,42 @@ Window {
         }
         anchors.horizontalCenter: parent.horizontalCenter
     }
+
     ListView{
+        id:list;
         anchors.fill: parent
         anchors.top: title.bottom
         anchors.topMargin: 30
         clip:true
         model: UserDetail{}
+        delegate: listItem
 
-        delegate:ExpandedBox{
-            width: root.width
-            name: model.name
-            age: "Age: " +model.age
-            balance: "Balance: "+model.balance
-            gender: "Gender: "+model.gender
-            email: "Email: "+model.email
-            phone: "Phone: "+model.phone
+        onMovementEnded: {
 
+            if(contentY===contentHeight-height){
+                console.log("Loading More")
+                model.currentState()
+            }
         }
         spacing: 1
+
     }
 
+    Component{
+    id:listItem
+    ExpandedBox{
+        width: mainWindow.width
+        name: model.name
+        age: "Age: " +model.age
+        balance: "Balance: "+model.balance
+        gender: "Gender: "+model.gender
+        email: "Email: "+model.email
+        phone: "Phone: "+model.phone
+    }
+}
 
+
+    function bottomReached(){
+        console.log();
+    }
 }

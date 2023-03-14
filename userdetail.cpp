@@ -3,6 +3,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDir>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 
 UserDetail::UserDetail(QObject *parent)
     : QAbstractListModel(parent)
@@ -19,12 +22,22 @@ int UserDetail::rowCount(const QModelIndex &parent) const
 
     //Change 3 When you implement loading for server The List .count
     // FIXME: Implement me!
-    return 1;
+//    return doc.toList().count();
+    return dataRange;
 }
 void UserDetail::loadJson()
 {
-    //Initialise with Data
-    //TODO: ADD Dynamic PATH
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    //connect signal to slot to verify reply
+    connect(manager,SIGNAL(finished(QNetworkReply*)), this, SLOT(finishedReply(QNetworkReply*)));
+    QString url = "http://localhost:3000/"+QString::number(dataRange);
+    QNetworkRequest request((QUrl(url)));
+    QNetworkReply  *reply = manager->get(request);
+//    QJsonDocument jsonData = QJsonDocument::fromJson(reply)
+
+
+
+
     QFile file("../UserDetailsListView/Data.json");
     QString val;
 
@@ -36,6 +49,12 @@ void UserDetail::loadJson()
         doc = QJsonDocument::fromJson(val.toUtf8()).toVariant(); //Change Dont work with QJSON dirctly ;
 
     }
+
+}
+
+void UserDetail::nextBatch()
+{
+    dataRange+=20;
 
 }
 
@@ -74,6 +93,12 @@ QVariant UserDetail::data(const QModelIndex &index, int role) const
         return QVariant(phone);
     }
     return QVariant();
+}
+
+void UserDetail::currentState()
+{
+    nextBatch();
+    qDebug() << QString::number(dataRange);
 }
 
 bool UserDetail::setData(const QModelIndex &index, const QVariant &value, int role)

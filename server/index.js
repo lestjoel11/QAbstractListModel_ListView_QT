@@ -2,23 +2,21 @@ const express = require("express");
 const app = express();
 const fs = require("fs");
 const port = 3000;
+const dataPath = "../Data.json";
+const jsonData = JSON.parse(fs.readFileSync(dataPath));
 
-function parseJsonFile() {
-    fs.readFile("../Data.json", (err, data) => {
-        if (err) {
-            return -1;
-        } else {
-            console.log(data[0]);
-            return JSON.parse(data);
-        }
-    });
-}
+const rangedData = (end, jsonData = JSON.parse) => {
+    const filteredData = () => {
+        return jsonData.slice(0, end);
+    };
+    console.log(filteredData().length);
+    return filteredData();
+};
 
 app.get("/:range", (req, res) => {
-    const start = req.params.range.split("-")[0];
-    const end = req.params.range.split("-")[1];
-    console.log("Start: " + start + " End: " + end);
-    res.send("Hello");
+    const end = req.params.range;
+    const result = rangedData(end, jsonData);
+    res.json(result);
 });
 
 app.listen(port, () => {

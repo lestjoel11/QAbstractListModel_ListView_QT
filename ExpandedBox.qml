@@ -17,8 +17,8 @@ Rectangle {
             name: "default"
             PropertyChanges {
                 target: infoBox;
-                color:"darkgray"
-                height: detailsColumn.height
+                color:"lightcyan"
+                implicitHeight: detailsColumn.height
 //                height: 30;
 
             }
@@ -36,9 +36,9 @@ Rectangle {
             name: "expanded"
             PropertyChanges {
                 target: infoBox;
-                color:"cornsilk"
-//                height: detailsColumn.height
-                height: 145;
+                color:"gold"
+                implicitHeight: moreDetailsColumn.height+detailsColumn.height
+//                implicitHeight: 145;
             }
             PropertyChanges {
                 target: detailsColumn;
@@ -58,7 +58,7 @@ Rectangle {
             to: "expanded";
             PropertyAnimation {
                 target: infoBox
-                property: "height"
+                property: "implicitHeight"
                 duration: 130
             }
 
@@ -69,12 +69,12 @@ Rectangle {
             PropertyAnimation {
                 target: moreDetails
                 property: "visible"
-                duration: 280
+                duration: 150
             }
             PropertyAnimation {
                 target: infoBox
-                property: "height"
-                duration: 300
+                property: "implicitHeight"
+                duration: 200
             }
         }
     ]
@@ -91,7 +91,7 @@ Rectangle {
         Item{
             id:moreDetails
             anchors.top: name.bottom
-            x: balance.paintedWidth-detailsColumn.width
+            x: name.paintedWidth-detailsColumn.width
 
             Column{
                 padding:7
