@@ -22,7 +22,6 @@ Window {
         }
         anchors.horizontalCenter: parent.horizontalCenter
     }
-
     ListView{
         id:list;
         anchors.fill: parent
@@ -31,31 +30,27 @@ Window {
         clip:true
         model: UserDetail{}
         delegate: listItem
-
         onMovementEnded: {
-
             if(contentY===contentHeight-height){
                 console.log("Loading More")
-                model.currentState()
+                model.loadMoreRows()
             }
         }
         spacing: 1
 
     }
-
     Component{
-    id:listItem
-    ExpandedBox{
-        width: mainWindow.width
-        name: model.name
-        age: "Age: " +model.age
-        balance: "Balance: "+model.balance
-        gender: "Gender: "+model.gender
-        email: "Email: "+model.email
-        phone: "Phone: "+model.phone
+        id:listItem
+        ExpandedBox{
+            width: mainWindow.width
+            name: model.name
+            age: "Age: " +model.age
+            balance: "Balance: "+model.balance
+            gender: "Gender: "+model.gender
+            email: "Email: "+model.email
+            phone: "Phone: "+model.phone
+        }
     }
-}
-
 
     function bottomReached(){
         console.log();

@@ -1,19 +1,23 @@
 #ifndef USERDETAIL_H
 #define USERDETAIL_H
 
-#include "qjsondocument.h"
 #include <QAbstractListModel>
 #include <QVector>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-
+#include <QList>
 
 
 
 class UserDetail : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(QList<QVariantMap> doc READ getDoc WRITE setDoc RESET resetDoc NOTIFY docChanged)
+
+    Q_PROPERTY(int from READ getFrom WRITE setFrom RESET resetFrom NOTIFY fromChanged)
+
+    Q_PROPERTY(int to READ getTo WRITE setTo RESET resetTo NOTIFY toChanged)
 
 public:
     explicit UserDetail(QObject *parent = nullptr);
@@ -42,16 +46,41 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     virtual QHash<int, QByteArray> roleNames() const override;
 
-private:
-    QVariant doc;
-    int dataRange = 20;
+    QList<QVariantMap> getDoc() const;
+    void setDoc(const QList<QVariantMap> &newDoc);
+    void resetDoc();
 
-public slots:
-    void currentState();
+    int getFrom() const;
+    void setFrom(int newFrom);
+    void resetFrom();
+
+    int getTo() const;
+    void setTo(int newTo);
+    void resetTo();
+
+private:
+    QList<QVariantMap> doc;
+    int from;
+    int to;
+    QNetworkAccessManager *manager;
+
+
+
+signals:
+    void docChanged();
+
+    void fromChanged();
+
+    void toChanged();
+
+    void onLoadMoreRows(QNetworkAccessManager *manager);
+
+public Q_SLOTS:
+    void loadMoreRows();
 
 private slots:
     void finishedReply(QNetworkReply *reply);
-    void setJSONData(const QVariant &data);
+    void setJSONData(QNetworkAccessManager *manager);
 };
 
 #endif // USERDETAIL_H

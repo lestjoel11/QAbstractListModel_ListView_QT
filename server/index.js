@@ -5,17 +5,18 @@ const port = 3000;
 const dataPath = "../Data.json";
 const jsonData = JSON.parse(fs.readFileSync(dataPath));
 
-const rangedData = (end, jsonData = JSON.parse) => {
+const rangedData = (start, end, jsonData = JSON.parse) => {
     const filteredData = () => {
-        return jsonData.slice(0, end);
+        return jsonData.slice(start, end);
     };
     console.log(filteredData().length);
     return filteredData();
 };
 
 app.get("/:range", (req, res) => {
-    const end = req.params.range;
-    const result = rangedData(end, jsonData);
+    const start = req.params.range.split("-")[0];
+    const end = req.params.range.split("-")[1];
+    const result = rangedData(start, end, jsonData);
     res.json(result);
 });
 

@@ -6,11 +6,20 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QEventLoop>
+#include <cmath>
+#include <QJsonArray>
 
 UserDetail::UserDetail(QObject *parent)
     : QAbstractListModel(parent)
 {
-    loadJson();
+    setFrom(0);setTo(20);
+    manager = new QNetworkAccessManager(this);
+    connect(manager, &QNetworkAccessManager::finished, this, &UserDetail::finishedReply);
+
+    setJSONData(manager);
+
+    connect(this,&UserDetail::onLoadMoreRows,this,&UserDetail::setJSONData, Qt::QueuedConnection);
 }
 
 int UserDetail::rowCount(const QModelIndex &parent) const
@@ -20,18 +29,19 @@ int UserDetail::rowCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
-    // FIXME: Implement me!
-    //    return doc.toList().count();
-    return dataRange;
+    return doc.size();
+
 }
-void UserDetail::loadJson()
-{
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    //connect signal to slot to verify reply
-    connect(manager,SIGNAL(finished(QNetworkReply*)), this, SLOT(finishedReply(QNetworkReply*)));
-    QString url = "http://localhost:3000/"+QString::number(dataRange);
-    QNetworkRequest request((QUrl(url)));
-    QNetworkReply *reply = manager->get(request);
+
+//Commenting out for future ref
+//void UserDetail::loadJson()
+//{
+    //    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    //    //connect signal to slot to verify reply
+    //    connect(manager,SIGNAL(finished(QNetworkReply*)), this, SLOT(finishedReply(QNetworkReply*)));
+    //    QString url = "http://localhost:3000/"+QString::number(to);
+    //    QNetworkRequest request((QUrl(url)));
+    //    QNetworkReply *reply = manager->get(request);
     //    QJsonDocument jsonData = QJsonDocument::fromJson(reply)
 
 
@@ -47,87 +57,92 @@ void UserDetail::loadJson()
 
     //    }
 
-}
+//}
 
-void UserDetail::nextBatch()
-{
-    dataRange+=20;
 
-}
 
 QVariant UserDetail::data(const QModelIndex &index, int role) const
 {
 
-    QList obj = doc.toList();
-    QMap currentRow = obj.at(index.row()).toMap();
-    const int id = currentRow.value("id").toInt();
-    const QString balance = currentRow.value("balance").toString();
-    const int age = currentRow.value("age").toInt();
-    const QString name = currentRow.value("name").toString();
-    const QString gender = currentRow.value("gender").toString();
-    const QString email = currentRow.value("email").toString();
-    const QString phone = currentRow.value("phone").toString();
-
     if (!index.isValid())
         return QVariant();
 
-    // FIXME: Implement me!
+    QList<QVariantMap> jsonData = getDoc();
+    QVariantMap currentRow = jsonData.at(index.row());
     switch(role){
     case IdRole:
-        return QVariant(id);
+        return QVariant(currentRow.value("id").toInt());
     case BalanceRole:
-        return QVariant(balance);
+        return QVariant(currentRow.value("balance").toString());
     case AgeRole:
-        return QVariant(age);
+        return QVariant(currentRow.value("age").toInt());
     case NameRole:
-        return QVariant(name);
+        return QVariant(currentRow.value("name").toString());
     case GenderRole:
-        return QVariant(gender);
+        return QVariant(currentRow.value("gender").toString());
     case EmailRole:
-        return QVariant(email);
+        return QVariant(currentRow.value("email").toString());
     case PhoneRole:
-        return QVariant(phone);
+        return QVariant(currentRow.value("phone").toString());
     }
     return QVariant();
 }
 
-void UserDetail::currentState()
+void UserDetail::setJSONData(QNetworkAccessManager *manager)
 {
-    nextBatch();
-    qDebug() << QString::number(dataRange);
+    QString url = "http://localhost:3000/"+QString::number(getFrom())+"-"+QString::number(getTo());
+    QNetworkRequest request((QUrl(url)));
+    QNetworkReply *reply = manager->get(request);
+    QEventLoop loop;
+    connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
 }
+
 
 void UserDetail::finishedReply(QNetworkReply *reply)
 {
-
-    //check if error
     if(reply->error() == QNetworkReply::NoError) {
-        QByteArray data = reply->readAll();
-        QVariant jsonData = QJsonDocument::fromJson(data).toVariant();
-        setJSONData(jsonData);
+        QList<QVariantMap> list;
+        QJsonArray array = QJsonDocument::fromJson(reply->readAll()).array();
+        for(int i=0; i<array.size();i++){
+            QJsonObject object = array.at(i).toObject();
+            QVariantMap  map = object.toVariantMap();
+            list.append(map);
+        }
+        int oldRowCount = rowCount();
+        int newRowCount = oldRowCount +list.size();
+        beginInsertRows(QModelIndex(), oldRowCount,newRowCount-1);
+        doc.append(list);
+        endInsertRows();
     }else{
         //handle error
         qDebug() << "Error: " << reply->errorString();
     }
+
     //delete reply object
     reply->deleteLater();
-}
-
-void UserDetail::setJSONData(const QVariant &data)
-{
-    doc = data;
-    qDebug() << doc;
-
 }
 
 bool UserDetail::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (data(index, role) != value) {
-        // FIXME: Implement me!
-        emit dataChanged(index, index, {role});
+        emit dataChanged(index, index, {Qt::DisplayRole});
         return true;
     }
     return false;
+}
+
+void UserDetail::loadMoreRows()
+{
+    nextBatch();
+    emit onLoadMoreRows(manager);
+}
+
+void UserDetail::nextBatch()
+{
+    setFrom(getTo());
+    setTo(getTo()+20);
+
 }
 
 Qt::ItemFlags UserDetail::flags(const QModelIndex &index) const
@@ -149,4 +164,58 @@ QHash<int, QByteArray> UserDetail::roleNames() const
     names[PhoneRole] = "phone";
 
     return names;
+}
+
+QList<QVariantMap> UserDetail::getDoc() const
+{
+    return doc;
+}
+
+void UserDetail::setDoc(const QList<QVariantMap> &newDoc)
+{
+    if (doc == newDoc)
+        return;
+    doc = newDoc;
+    emit docChanged();
+}
+
+void UserDetail::resetDoc()
+{
+    setDoc({}); // TODO: Adapt to use your actual default value
+}
+
+int UserDetail::getFrom() const
+{
+    return from;
+}
+
+void UserDetail::setFrom(int newFrom)
+{
+    if (from == newFrom)
+        return;
+    from = newFrom;
+    emit fromChanged();
+}
+
+void UserDetail::resetFrom()
+{
+    setFrom({}); // TODO: Adapt to use your actual default value
+}
+
+int UserDetail::getTo() const
+{
+    return to;
+}
+
+void UserDetail::setTo(int newTo)
+{
+    if (to == newTo)
+        return;
+    to = newTo;
+    emit toChanged();
+}
+
+void UserDetail::resetTo()
+{
+    setTo({}); // TODO: Adapt to use your actual default value
 };
