@@ -18,7 +18,6 @@ UserDetail::UserDetail(QObject *parent)
     connect(manager, &QNetworkAccessManager::finished, this, &UserDetail::finishedReply);
 
     setJSONData(manager);
-
     connect(this,&UserDetail::onLoadMoreRows,this,&UserDetail::setJSONData, Qt::QueuedConnection);
 }
 
@@ -28,9 +27,9 @@ int UserDetail::rowCount(const QModelIndex &parent) const
     // other (valid) parents, rowCount() should return 0 so that it does not become a tree model.
     if (parent.isValid())
         return 0;
-
+    //TODO: Dont return value if there is no value
+    //This Calls the data function which was causing the crash before, changing it to doc.size() fixed it
     return doc.size();
-
 }
 
 //Commenting out for future ref
@@ -66,12 +65,12 @@ QVariant UserDetail::data(const QModelIndex &index, int role) const
 
     if (!index.isValid())
         return QVariant();
-
+    qDebug() << index.row();
     QList<QVariantMap> jsonData = getDoc();
     QVariantMap currentRow = jsonData.at(index.row());
     switch(role){
     case IdRole:
-        return QVariant(currentRow.value("id").toInt());
+        return QVariant((currentRow.value("index").toInt()+1));
     case BalanceRole:
         return QVariant(currentRow.value("balance").toString());
     case AgeRole:
@@ -93,14 +92,15 @@ void UserDetail::setJSONData(QNetworkAccessManager *manager)
     QString url = "http://localhost:3000/"+QString::number(getFrom())+"-"+QString::number(getTo());
     QNetworkRequest request((QUrl(url)));
     QNetworkReply *reply = manager->get(request);
-    QEventLoop loop;
-    connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    loop.exec();
+//    QEventLoop loop;
+//    connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+//    loop.exec();
 }
 
 
 void UserDetail::finishedReply(QNetworkReply *reply)
 {
+    //log main thread
     if(reply->error() == QNetworkReply::NoError) {
         QList<QVariantMap> list;
         QJsonArray array = QJsonDocument::fromJson(reply->readAll()).array();
@@ -114,6 +114,7 @@ void UserDetail::finishedReply(QNetworkReply *reply)
         beginInsertRows(QModelIndex(), oldRowCount,newRowCount-1);
         doc.append(list);
         endInsertRows();
+
     }else{
         //handle error
         qDebug() << "Error: " << reply->errorString();

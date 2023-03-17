@@ -30,6 +30,9 @@ Window {
         clip:true
         model: UserDetail{}
         delegate: listItem
+//        preferredHighlightBegin:height/2 - delegate.height/2
+//        preferredHighlightEnd: height/2 + delegate.height/2
+//        highlightRangeMode: ListView.StrictlyEnforceRange
         onMovementEnded: {
             if(contentY===contentHeight-height){
                 console.log("Loading More")
@@ -43,7 +46,7 @@ Window {
         id:listItem
         ExpandedBox{
             width: mainWindow.width
-            name: model.name
+            name: index+1+". "+model.name
             age: "Age: " +model.age
             balance: "Balance: "+model.balance
             gender: "Gender: "+model.gender
